@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniPlanner - Tadashi Hamada Cyber Edition</title>
+    <style>
+        /* ==========================================================================
+           1. VARIABLES DE COLOR PREMIUM (Estilo Notion Dark / Minimalista)
+           ========================================================================== */
+        :root {
+            --bg-main: #191919;       /* Fondo oscuro profundo de Notion */
+            --bg-sidebar: #202020;    /* Sidebar ligeramente más claro */
+            --bg-card: #252525;       /* Tarjetas de actividades */
+            --bg-hover: #2e2e2e;      /* Efectos hover */
+            --border-color: #2c2c2c;  /* Líneas divisorias sutiles */
+            
+            --text-main: #f3f3f3;     /* Texto principal brillante */
+            --text-muted: #8c8c8c;    /* Texto secundario/desactivado */
+            
+            --primary: #477dff;       /* Azul eléctrico de acento */
+            --primary-hover: #356be6;
+            
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 4px;
+        }
+
+        /* ==========================================================================
+           FONDO CINEMÁTICO AVANZADO: NEBULOSAS, GRANDES ESTRELLAS GIRATORIAS Y GLOW
+           ========================================================================== */
+        .stars-bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            background: 
+                radial-gradient(circle at 15% 25%, rgba(71, 125, 255, 0.18) 0%, transparent 50%),
+                radial-gradient(circle at 85% 75%, rgba(168, 85, 247, 0.16) 0%, transparent 55%),
+                #0f0f0f;
+        }
+
+        /* Partículas Brillantes y Grandes Estrellas Cosmicas */
+        .star-particle {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatGlowEpic 16s infinite ease-in-out;
+        }
+
+        /* Variación de Estrellas con Brillo Ciano y Púrpura */
+        .star-particle.epic-glow {
+            background: radial-gradient(circle, #ffffff 40%, rgba(71, 125, 255, 0.9) 100%);
+            box-shadow: 0 0 20px 6px rgba(71, 125, 255, 0.75), 0 0 6px 2px #ffffff;
+        }
+        .star-particle.purple-glow {
+            background: radial-gradient(circle, #ffffff 40%, rgba(168, 85, 247, 0.9) 100%);
+            box-shadow: 0 0 20px 6px rgba(168, 85, 247, 0.7), 0 0 6px 2px #ffffff;
+        }
+
+        @keyframes floatGlowEpic {
+            0% {
+                transform: translateY(105vh) translateX(0) scale(0.3) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.95; }
+            50% { 
+                transform: translateY(50vh) translateX(40px) scale(1.3) rotate(180deg);
+                box-shadow: 0 0 25px 6px rgba(255, 255, 255, 0.7); 
+            }
+            90% { opacity: 0.95; }
+            100% {
+                transform: translateY(-10vh) translateX(90px) scale(1.8) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* ==========================================================================
+           ASISTENTE HOLOGRÁFICO INTERACTIVO: FIDELIDAD ESTILO TADASHI HAMADA
+           ========================================================================== */
+        .hologram-assistant {
+            position: fixed;
+            bottom: 25px;
+            right: 365px; 
+            width: 170px;
+            height: 250px;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            animation: tadashiFloat 4.5s infinite ease-in-out;
+            filter: drop-shadow(0 0 14px rgba(71, 125, 255, 0.65));
+        }
+
+        @keyframes tadashiFloat {
+            0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 14px rgba(71, 125, 255, 0.55)); }
+            50% { transform: translateY(-14px) scale(1.03); filter: drop-shadow(0 0 24px rgba(168, 85, 247, 0.75)); }
+        }
+
+        /* Base del proyector holográfico con haz de luz ascendente sutil */
+        .hologram-base {
+            width: 110px;
+            height: 16px;
+            background: radial-gradient(ellipse, rgba(71, 125, 255, 0.85) 0%, transparent 75%);
+            border-radius: 50%;
+            border: 1px solid rgba(71, 125, 255, 0.4);
+            position: relative;
+            box-shadow: 0 0 16px rgba(71, 125, 255, 0.7);
+        }
+
+        .hologram-character-svg {
+            width: 130px;
+            height: 190px;
+            opacity: 0.88;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Reacción de Alerta / Motivación cuando suena un Recordatorio */
+        .hologram-assistant.alarm-active {
+            animation: tadashiAlert 0.25s infinite alternate;
+            filter: drop-shadow(0 0 28px #2ecc71);
+        }
+
+        .hologram-assistant.alarm-active .hologram-character-svg {
+            opacity: 1;
+            transform: scale(1.12);
+        }
+
+        @keyframes tadashiAlert {
+            0% { transform: translateY(-8px) rotate(-1.5deg); }
+            100% { transform: translateY(-8px) rotate(1.5deg); }
+        }
+
+        /* Banner estético superior en panel de actividades */
+        .panel-banner-aesthetic {
+            width: 100%;
+            height: 105px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.65);
+            transition: background-image 0.6s ease;
+        }
+
+        /* ==========================================================================
+           2. ESTILOS BASE Y CONFIGURACIÓN DE PANTALLA
+           ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: table;
+            width: 100%;
+            height: 100vh;
+            table-layout: fixed;
+            position: relative;
+            z-index: 1;
+            background: transparent;
+        }
+
+        .sidebar-col, .main-col, .panel-col {
+            display: table-cell;
+            vertical-align: top;
+            height: 100%;
+            background: transparent;
+        }
+
+        /* ==========================================================================
+           3. COLUMNA 1: SIDEBAR LATERAL (260px)
+           ========================================================================== */
+        .sidebar-col {
+            width: 260px;
+            background-color: rgba(32, 32, 32, 0.88);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            position: relative;
+        }
+
+        .brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: block;
+        }
+
+        .live-clock {
+            background: linear-gradient(135deg, #252525, #1e1e1e);
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #clock-time {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        #clock-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .sound-control {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+        }
+        .sound-header {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .sound-flex { display: block; margin-bottom: 8px; }
+        .switch-label { font-size: 0.8rem; color: var(--text-muted); cursor: pointer; }
+
+        .categories-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        .categories-list { list-style: none; }
+        .cat-item {
+            display: block;
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            background-color: rgba(255,255,255,0.02);
+        }
+        .cat-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        /* FIRMA PERSONALIZADA PREMIUM CON ANIMACIÓN SUAVE Y RESPIRACIÓN GLOW */
+        .creator-signature {
+            position: absolute;
+            bottom: 20px;
+            left: 24px;
+            right: 24px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            text-transform: uppercase;
+            border-top: 1px solid rgba(243, 243, 243, 0.06);
+            padding-top: 14px;
+            animation: signaturePulse 4s infinite ease-in-out;
+        }
+
+        @keyframes signaturePulse {
+            0%, 100% { text-shadow: 0 0 6px rgba(71, 125, 255, 0.2), 0 0 2px rgba(71,125,255,0.1); color: rgba(255, 255, 255, 0.4); }
+            50% { text-shadow: 0 0 18px rgba(71, 125, 255, 0.9), 0 0 6px rgba(168, 85, 247, 0.6); color: rgba(255, 255, 255, 0.95); }
+        }
+
+        /* ==========================================================================
+           4. COLUMNA 2: CALENDARIO PRINCIPAL
+           ========================================================================== */
+        .main-col {
+            background-color: rgba(25, 25, 25, 0.3);
+            padding: 24px;
+        }
+        .calendar-header { width: 100%; margin-bottom: 20px; }
+        .calendar-title-inline { display: inline-block; font-size: 1.5rem; font-weight: 700; }
+        .calendar-nav-buttons { float: right; }
+
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .calendar-table th {
+            background-color: #191919;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 10px;
+            text-align: center;
+            width: 14.28%;
+        }
+        .calendar-table td {
+            background-color: rgba(25, 25, 25, 0.88);
+            backdrop-filter: blur(4px);
+            width: 14.28%;
+            height: 105px;
+            vertical-align: top;
+            padding: 8px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            position: relative;
+            box-sizing: border-box;
+            transition: background-color 0.2s ease;
+        }
+        .calendar-table td:hover { background-color: var(--bg-sidebar); }
+        .calendar-table td.selected-day-cell {
+            background-color: rgba(71, 125, 255, 0.05);
+            outline: 1.5px solid rgba(71, 125, 255, 0.6);
+            outline-offset: -1.5px;
+            z-index: 2;
+        }
+        .day-num-box {
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            border-radius: 50%;
+            margin-bottom: 4px;
+        }
+        .calendar-table td.today .day-num-box { background-color: var(--primary); color: #ffffff; }
+        .calendar-table td.other-month { opacity: 0.25; }
+
+        .mini-event-strip {
+            font-size: 0.7rem;
+            padding: 2px 4px;
+            border-radius: var(--radius-sm);
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        /* ==========================================================================
+           5. COLUMNA 3: PANEL DE ACTIVIDADES (340px)
+           ========================================================================== */
+        .panel-col {
+            width: 340px;
+            background-color: rgba(32, 32, 32, 0.88);
+            backdrop-filter: blur(12px);
+            border-left: 1px solid var(--border-color);
+            padding: 24px;
+        }
+        .panel-header {
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+        #selected-day-label { font-size: 0.85rem; color: var(--text-muted); display: block; margin-top: 4px; }
+
+        .activity-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .act-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+        .act-time { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; display: block; }
+        .act-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4; }
+        .badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; font-weight: 600; display: inline-block; margin-right: 6px; }
+        .status-badge { background-color: #333; color: #ccc; }
+        .status-badge.progress { background-color: rgba(241,196,15,0.15); color: #f1c40f; }
+        .status-badge.completed { background-color: rgba(46,204,113,0.15); color: #2ecc71; }
+        .activity-card.completed { opacity: 0.4; }
+
+        .card-actions { margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 8px; text-align: right; }
+        .action-link { font-size: 0.75rem; color: var(--text-muted); cursor: pointer; margin-left: 12px; }
+        .action-link:hover { color: var(--text-main); }
+        .action-link.delete:hover { color: #ff4d4d; }
+
+        /* Controles Globales de Botones y Formularios */
+        .btn-primary { background-color: var(--primary); color: white; border: none; padding: 11px 16px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; width: 100%; display: block; text-align: center; margin-bottom: 16px; font-size: 0.9rem; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: var(--radius-md); font-size: 0.85rem; cursor: pointer; }
+        .btn-nav { background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: var(--radius-md); cursor: pointer; font-weight: bold; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
+        .form-control { width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: var(--radius-md); font-size: 0.9rem; }
+
+        /* Modales */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background-color: var(--bg-sidebar); border: 1px solid var(--border-color); width: 440px; padding: 24px; border-radius: var(--radius-lg); }
+        .close-modal-btn { float: right; cursor: pointer; color: var(--text-muted); }
+
+        /* Toast Alerta */
+        .notification-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: #1a1a1a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 6px solid var(--primary);
+            width: 380px;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: none;
+            z-index: 200;
+            box-shadow: 0 0 24px 4px rgba(71, 125, 255, 0.35), 0 10px 40px rgba(0,0,0,0.7);
+        }
+        .notification-toast.active { 
+            display: block; 
+            animation: toastIntroGlow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), toastVibrate 0.4s linear 2;
+        }
+        @keyframes toastIntroGlow { 0% { transform: translateY(60px) scale(0.9); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes toastVibrate { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px) translateY(-1px); } 75% { transform: translateX(3px) translateY(1px); } }
+        .toast-header { font-size: 0.75rem; color: var(--primary); font-weight: 800; letter-spacing: 1.5px; margin-bottom: 8px; }
+        .toast-title { font-weight: 700; font-size: 1.15rem; color: #ffffff; margin-bottom: 6px; }
+        .toast-quote { font-size: 0.88rem; color: #2ecc71; font-weight: 600; text-shadow: 0 0 8px rgba(46, 204, 113, 0.2); }
+    </style>
+</head>
+<body>
+
+    <div class="stars-bg-container" id="stars-container"></div>
+
+    <div class="hologram-assistant" id="tadashi-hologram">
+        <svg class="hologram-character-svg" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+            <g id="tadashi-character">
+                <path d="M32,46 C28,35 34,28 42,32 C48,26 58,26 64,32 C68,30 74,38 70,46 C60,48 40,48 32,46 Z" fill="#1c1613"/>
+                
+                <path d="M38,50 C38,42 62,42 62,50 C62,64 58,74 50,74 C42,74 38,64 38,50 Z" fill="#eef9ff" opacity="0.95"/>
+                <polygon points="44,56 56,56 54,74 46,74" fill="#d2f1ff" opacity="0.5"/> <path d="M34,44 C34,26 66,26 66,44 C56,46 44,46 34,44 Z" fill="#21283a"/> <path d="M34,44 C42,43 58,43 68,38 C76,34 82,38 84,43 C70,47 46,47 34,44 Z" fill="#151b29"/> <circle cx="50" cy="34" r="1.5" fill="#477dff"/> <path d="M43,47 C45,46 48,47 49,49" stroke="#1c1613" stroke-width="1.2" fill="none"/>
+                <path d="M57,47 C55,46 52,47 51,49" stroke="#1c1613" stroke-width="1.2" fill="none"/>
+                <ellipse cx="46" cy="53" rx="2.5" ry="3.5" fill="#21283a"/>
+                <ellipse cx="54" cy="53" rx="2.5" ry="3.5" fill="#21283a"/>
+                <circle cx="47" cy="52" r="0.8" fill="#ffffff"/> <circle cx="55" cy="52" r="0.8" fill="#ffffff"/>
+                <path d="M47,63 C49,65 51,65 53,63" stroke="#21283a" stroke-width="1" fill="none"/> <path d="M44,74 L56,74 L58,88 L42,88 Z" fill="#f3f3f3"/>
+                <path d="M47,74 L53,74 L50,80 Z" fill="#191919"/> <path d="M30,76 C30,72 40,72 50,75 C60,72 70,72 70,76 C74,92 76,112 74,132 C62,136 38,136 26,132 C24,112 26,92 30,76 Z" fill="#2d3748" opacity="0.9"/>
+                <path d="M30,76 L44,76 L40,132 L26,132 Z" fill="#1a202c"/> <path d="M70,76 L56,76 L60,132 L74,132 Z" fill="#1a202c"/> <path d="M26,94 C32,106 44,110 50,110 C56,110 68,106 74,94" stroke="#55ffff" stroke-width="2.5" fill="none" opacity="0.75" stroke-dasharray="4 2"/>
+                <circle cx="34" cy="104" r="3" fill="#477dff" opacity="0.8"/>
+                <circle cx="66" cy="104" r="3" fill="#16a34a" opacity="0.8"/>
+            </g>
+        </svg>
+        <div class="hologram-base"></div>
+    </div>
+
+    <div class="app-container">
+        <div class="sidebar-col">
+            <div class="brand">📅 UniPlanner</div>
+
+            <div class="live-clock">
+                <div id="clock-time">00:00:00</div>
+                <div id="clock-date">Cargando...</div>
+            </div>
+
+            <button class="btn-primary" id="btn-new-activity">➕ Nueva Actividad</button>
+
+            <div class="sound-control">
+                <span class="sound-header">🔔 Alarma Inteligente</span>
+                <div class="sound-flex">
+                    <input type="checkbox" id="toggle-sound" checked>
+                    <label for="toggle-sound" class="switch-label">Habilitar sonido</label>
+                </div>
+                <select id="select-sound-type" class="form-control" style="padding:6px; font-size:0.8rem;">
+                    <option value="success">Éxito Inspirador 🚀</option>
+                    <option value="focus">Enfoque Zen 🧘</option>
+                    <option value="energy">Energía Activa ⚡</option>
+                </select>
+            </div>
+
+            <div class="categories-title">Categorías</div>
+            <ul class="categories-list" id="categories-list"></ul>
+
+            <div class="creator-signature">Nelvin Marcos Palacios</div>
+        </div>
+
+        <div class="main-col">
+            <div class="calendar-header">
+                <h2 class="calendar-title-inline" id="current-month-year">Mayo 2026</h2>
+                <div class="calendar-nav-buttons">
+                    <button class="btn-nav" id="prev-month">◀</button>
+                    <button class="btn-secondary" id="btn-today">Hoy</button>
+                    <button class="btn-nav" id="next-month">▶</button>
+                </div>
+            </div>
+
+            <table class="calendar-table">
+                <thead>
+                    <tr><th>Dom</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th></tr>
+                </thead>
+                <tbody id="calendar-days-body"></tbody>
+            </table>
+        </div>
+
+        <div class="panel-col">
+            <div class="panel-banner-aesthetic" id="panel-banner"></div>
+            
+            <div class="panel-header">
+                <h3>Actividades del Día</h3>
+                <span id="selected-day-label">Selecciona una fecha</span>
+            </div>
+            <div id="day-activities-container"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="activity-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Nueva Actividad</h3>
+                <span class="close-modal-btn" id="close-modal">❌</span>
+            </div>
+            <form id="activity-form">
+                <input type="hidden" id="activity-id">
+                <input type="hidden" id="activity-date">
+                <div class="form-group">
+                    <label>Título de la Actividad *</label>
+                    <input type="text" id="act-title" class="form-control" required placeholder="Ej: Avance de Proyecto">
+                </div>
+                <div class="form-group">
+                    <label>Hora de Inicio *</label>
+                    <input type="time" id="act-time" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Categoría *</label>
+                    <select id="act-category" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Estado Inicial</label>
+                    <select id="act-status" class="form-control">
+                        <option value="pending">Pendiente ⏳</option>
+                        <option value="progress">En Progreso ⚙️</option>
+                        <option value="completed">Completado ✅</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notas / Descripción</label>
+                    <textarea id="act-desc" class="form-control" rows="3" placeholder="Añade detalles del entregable..."></textarea>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn-secondary" id="btn-cancel-modal" style="margin-right:8px;">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width:auto; display:inline-block; margin-bottom:0;">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="notification-toast" id="notification-toast">
+        <div class="toast-header">📢 TADASHI INTELLIGENT ALARM</div>
+        <div class="toast-title" id="toast-title">Actividad Iniciada</div>
+        <div class="toast-quote" id="toast-desc">¡Vamos, tú puedes lograrlo! 🚀</div>
+        <div style="text-align:right; margin-top:14px;">
+            <span id="close-toast" style="cursor:pointer; font-size:0.8rem; color:var(--text-muted); font-weight:700; background:rgba(255,255,255,0.06); padding:4px 10px; border-radius:var(--radius-sm);">Entendido</span>
+        </div>
+    </div>
+
+    <script>
+        const CATEGORIES = {
+            estudios: { label: 'Estudios', icon: '📖', color: '#477dff', bg: 'rgba(71,125,255,0.12)' },
+            reuniones: { label: 'Reuniones', icon: '👥', color: '#a855f7', bg: 'rgba(168,85,247,0.12)' },
+            tareas: { label: 'Tareas', icon: '📝', color: '#f1c40f', bg: 'rgba(241,196,15,0.12)' },
+            proyectos: { label: 'Proyectos', icon: '🎯', color: '#2ecc71', bg: 'rgba(46,204,113,0.12)' },
+            trabajo: { label: 'Trabajo', icon: '💼', color: '#e67e22', bg: 'rgba(230,126,34,0.12)' },
+            personal: { label: 'Personal', icon: '🏠', color: '#ec4899', bg: 'rgba(236,72,153,0.12)' },
+            varios: { label: 'Varios', icon: '📌', color: '#95a5a6', bg: 'rgba(149,165,166,0.12)' }
+        };
+
+        // FRASES EMITIDAS DINÁMICAMENTE POR EL ASISTENTE TADASHI
+        const MOTIVATIONAL_QUOTES = [
+            "¡Vamos, tú puedes lograrlo! 🚀",
+            "Hora de enfocarse 📚",
+            "Cada tarea te acerca al éxito ✨",
+            "¡Enfoque total activado! No te detengas 💪"
+        ];
+
+        const AESTHETIC_IMAGES = [
+            "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop", 
+            "https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?q=80&w=600&auto=format&fit=crop"
+        ];
+
+        let activities = JSON.parse(localStorage.getItem('uniplanner_db')) || [];
+        let currentDate = new Date();
+        let selectedDate = new Date(); 
+
+        const tableBody = document.getElementById('calendar-days-body');
+        const currentMonthYearLabel = document.getElementById('current-month-year');
+        const selectedDayLabel = document.getElementById('selected-day-label');
+        const dayActivitiesContainer = document.getElementById('day-activities-container');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            initSidebarCategories();
+            initSelectOptions();
+            generateCinematicStars(); 
+            rotateAestheticBanner(); 
+            renderFullCalendar();
+            renderSelectedDayActivities();
+            setupEvents();
+            setInterval(checkSystemReminders, 1000);
+        });
+
+        function rotateAestheticBanner() {
+            const banner = document.getElementById('panel-banner');
+            const randomImg = AESTHETIC_IMAGES[Math.floor(Math.random() * AESTHETIC_IMAGES.length)];
+            banner.style.backgroundImage = `url('${randomImg}')`;
+        }
+
+        // GENERADOR CINEMÁTICO: Estrellas macro giratorias hipervisibles
+        function generateCinematicStars() {
+            const container = document.getElementById('stars-container');
+            const totalStars = 60; 
+            for (let i = 0; i < totalStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star-particle';
+                star.style.left = `${Math.random() * 100}vw`;
+                star.style.top = `${Math.random() * 100}vh`;
+                
+                const size = Math.random() * 4.5 + 2; // Estrellas más robustas y perceptibles
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                let randomVal = Math.random();
+                if (randomVal > 0.7) star.classList.add('epic-glow');
+                else if (randomVal > 0.4) star.classList.add('purple-glow');
+                
+                const duration = Math.random() * 9 + 9;
+                star.style.animationDuration = `${duration}s`;
+                star.style.animationDelay = `${Math.random() * -20}s`; 
+                container.appendChild(star);
+            }
+        }
+
+        function initClock() {
+            const timeEl = document.getElementById('clock-time');
+            const dateEl = document.getElementById('clock-date');
+            setInterval(() => {
+                const now = new Date();
+                timeEl.textContent = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                dateEl.textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+            }, 1000);
+        }
+
+        function initSidebarCategories() {
+            const list = document.getElementById('categories-list');
+            list.innerHTML = '';
+            Object.keys(CATEGORIES).forEach(key => {
+                const item = CATEGORIES[key];
+                list.innerHTML += `<li class="cat-item"><span class="cat-dot" style="background-color: ${item.color}"></span>${item.icon} ${item.label}</li>`;
+            });
+        }
+
+        function initSelectOptions() {
+            const select = document.getElementById('act-category');
+            select.innerHTML = '';
+            Object.keys(CATEGORIES).forEach(key => {
+                select.innerHTML += `<option value="${key}">${CATEGORIES[key].icon} ${CATEGORIES[key].label}</option>`;
+            });
+        }
+
+        function renderFullCalendar() {
+            tableBody.innerHTML = '';
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            currentMonthYearLabel.textContent = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase();
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+            const prevTotalDays = new Date(year, month, 0).getDate();
+
+            let dayCounter = 1;
+            let nextMonthDayCounter = 1;
+            let html = '';
+
+            for (let i = 0; i < 6; i++) {
+                html += '<tr>';
+                for (let j = 0; j < 7; j++) {
+                    const cellIndex = i * 7 + j;
+                    
+                    if (cellIndex < firstDayIndex) {
+                        const prevDay = prevTotalDays - (firstDayIndex - cellIndex - 1);
+                        const prevDate = new Date(year, month - 1, prevDay);
+                        let isSelectedClass = prevDate.toDateString() === selectedDate.toDateString() ? 'selected-day-cell' : '';
+                        let dateStr = formatDate(prevDate);
+                        let eventsHtml = renderMiniEvents(dateStr);
+
+                        html += `<td class="other-month ${isSelectedClass}" onclick="selectCellDate(${year}, ${month - 1}, ${prevDay})"><span class="day-num-box">${prevDay}</span>${eventsHtml}</td>`;
+                    } else if (dayCounter <= totalDays) {
+                        const thisDate = new Date(year, month, dayCounter);
+                        let isTodayClass = thisDate.toDateString() === new Date().toDateString() ? 'today' : '';
+                        let isSelectedClass = thisDate.toDateString() === selectedDate.toDateString() ? 'selected-day-cell' : '';
+                        let dateStr = formatDate(thisDate);
+                        let eventsHtml = renderMiniEvents(dateStr);
+
+                        html += `<td class="${isTodayClass} ${isSelectedClass}" onclick="selectCellDate(${year}, ${month}, ${dayCounter})"><span class="day-num-box">${dayCounter}</span>${eventsHtml}</td>`;
+                        dayCounter++;
+                    } else {
+                        const nextDate = new Date(year, month + 1, nextMonthDayCounter);
+                        let isSelectedClass = nextDate.toDateString() === selectedDate.toDateString() ? 'selected-day-cell' : '';
+                        let dateStr = formatDate(nextDate);
+                        let eventsHtml = renderMiniEvents(dateStr);
+
+                        html += `<td class="other-month ${isSelectedClass}" onclick="selectCellDate(${year}, ${month + 1}, ${nextMonthDayCounter})"><span class="day-num-box">${nextMonthDayCounter}</span>${eventsHtml}</td>`;
+                        nextMonthDayCounter++;
+                    }
+                }
+                html += '</tr>';
+                if (dayCounter > totalDays && i >= 4) break;
+            }
+            tableBody.innerHTML = html;
+        }
+
+        function renderMiniEvents(dateStr) {
+            let filtered = activities.filter(a => a.date === dateStr);
+            let html = '';
+            filtered.slice(0, 2).forEach(act => {
+                let c = CATEGORIES[act.category];
+                html += `<span class="mini-event-strip" style="background-color:${c.bg}; color:${c.color}; border-left:3px solid ${c.color}">${act.time} ${act.title}</span>`;
+            });
+            return html;
+        }
+
+        function selectCellDate(y, m, d) {
+            selectedDate = new Date(y, m, d);
+            rotateAestheticBanner(); 
+            renderFullCalendar(); 
+            renderSelectedDayActivities();
+        }
+
+        function renderSelectedDayActivities() {
+            const str = formatDate(selectedDate);
+            selectedDayLabel.textContent = selectedDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+            
+            const listActs = activities.filter(a => a.date === str).sort((a,b) => a.time.localeCompare(b.time));
+            dayActivitiesContainer.innerHTML = '';
+
+            if(listActs.length === 0) {
+                dayActivitiesContainer.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding-top:30px; font-size:0.85rem;">☕ Sin actividades pendientes hoy.</div>';
+                return;
+            }
+
+            listActs.forEach(act => {
+                let cat = CATEGORIES[act.category];
+                let isComp = act.status === 'completed' ? 'completed' : '';
+                dayActivitiesContainer.innerHTML += `
+                    <div class="activity-card ${isComp}">
+                        <div class="act-title">${act.title}</div>
+                        <span class="act-time">⏰ ${act.time}</span>
+                        ${act.desc ? `<p class="act-desc">${act.desc}</p>` : ''}
+                        <div>
+                            <span class="badge" style="background-color:${cat.bg}; color:${cat.color}">${cat.icon} ${cat.label}</span>
+                            <span class="badge status-badge ${act.status}">${act.status.toUpperCase()}</span>
+                        </div>
+                        <div class="card-actions">
+                            <span class="action-link" onclick="toggleStatus('${act.id}')">✔️ Estado</span>
+                            <span class="action-link" onclick="openEdit('${act.id}')">✏️ Editar</span>
+                            <span class="action-link delete" onclick="deleteAct('${act.id}')">🗑️ Borrar</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function setupEvents() {
+            document.getElementById('prev-month').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderFullCalendar(); });
+            document.getElementById('next-month').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderFullCalendar(); });
+            document.getElementById('btn-today').addEventListener('click', () => { 
+                currentDate = new Date(); selectedDate = new Date(); renderFullCalendar(); renderSelectedDayActivities(); 
+            });
+            
+            document.getElementById('btn-new-activity').addEventListener('click', () => openModalForm());
+            document.getElementById('close-modal').addEventListener('click', () => closeModalForm());
+            document.getElementById('btn-cancel-modal').addEventListener('click', () => closeModalForm());
+            document.getElementById('close-toast').addEventListener('click', () => {
+                document.getElementById('notification-toast').classList.remove('active');
+                document.getElementById('tadashi-hologram').classList.remove('alarm-active'); 
+            });
+
+            document.getElementById('activity-form').addEventListener('submit', (e) => { e.preventDefault(); saveDataForm(); });
+        }
+
+        function openModalForm(id = null) {
+            const form = document.getElementById('activity-form');
+            form.reset();
+            if(id) {
+                let act = activities.find(a => a.id === id);
+                document.getElementById('modal-title').textContent = "Modificar Registro";
+                document.getElementById('activity-id').value = act.id;
+                document.getElementById('activity-date').value = act.date;
+                document.getElementById('act-title').value = act.title;
+                document.getElementById('act-time').value = act.time;
+                document.getElementById('act-category').value = act.category;
+                document.getElementById('act-status').value = act.status;
+                document.getElementById('act-desc').value = act.desc;
+            } else {
+                document.getElementById('modal-title').textContent = "Nueva Actividad";
+                document.getElementById('activity-id').value = '';
+                document.getElementById('activity-date').value = formatDate(selectedDate);
+                let now = new Date();
+                document.getElementById('act-time').value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            }
+            document.getElementById('activity-modal').classList.add('active');
+        }
+
+        function closeModalForm() { document.getElementById('activity-modal').classList.remove('active'); }
+
+        function saveDataForm() {
+            let id = document.getElementById('activity-id').value;
+            let date = document.getElementById('activity-date').value;
+            let title = document.getElementById('act-title').value;
+            let time = document.getElementById('act-time').value;
+            let category = document.getElementById('act-category').value;
+            let status = document.getElementById('act-status').value;
+            let desc = document.getElementById('act-desc').value;
+
+            if(id) {
+                let idx = activities.findIndex(a => a.id === id);
+                activities[idx] = {...activities[idx], title, time, category, status, desc};
+            } else {
+                activities.push({ id: 'id_' + Date.now(), date, title, time, category, status, desc, notified: false });
+            }
+            updateLocalStorage(); closeModalForm(); renderFullCalendar(); renderSelectedDayActivities();
+        }
+
+        function openEdit(id) { openModalForm(id); }
+        function deleteAct(id) { if(confirm('¿Eliminar actividad definitivamente?')) { activities = activities.filter(a => a.id !== id); updateLocalStorage(); renderFullCalendar(); renderSelectedDayActivities(); } }
+
+        function toggleStatus(id) {
+            let act = activities.find(a => a.id === id);
+            if(act.status === 'pending') act.status = 'progress';
+            else if(act.status === 'progress') act.status = 'completed';
+            else act.status = 'pending';
+            updateLocalStorage(); renderSelectedDayActivities();
+        }
+
+        function updateLocalStorage() { localStorage.setItem('uniplanner_db', JSON.stringify(activities)); initSidebarCategories(); }
+
+        function checkSystemReminders() {
+            let now = new Date();
+            let dStr = formatDate(now);
+            let tStr = now.toTimeString().substring(0, 5);
+
+            activities.forEach(act => {
+                if(act.date === dStr && act.time === tStr && !act.notified && act.status !== 'completed') {
+                    act.notified = true;
+                    updateLocalStorage();
+                    triggerPopUpAlarm(act);
+                }
+            });
+        }
+
+        function triggerPopUpAlarm(act) {
+            document.getElementById('toast-title').textContent = act.title;
+            document.getElementById('toast-desc').textContent = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+            
+            const toastElement = document.getElementById('notification-toast');
+            toastElement.style.borderLeftColor = CATEGORIES[act.category].color;
+            toastElement.style.boxShadow = `0 0 30px 5px ${CATEGORIES[act.category].color}66, 0 10px 40px rgba(0,0,0,0.7)`;
+            
+            toastElement.classList.add('active');
+
+            // INTERACCIÓN ACTIVA DEL HOLOGRAMA: Tadashi reacciona y entra en modo alerta vibrante
+            const hologram = document.getElementById('tadashi-hologram');
+            hologram.classList.add('alarm-active');
+
+            if(document.getElementById('toggle-sound').checked) {
+                playEpicAudioBeep(document.getElementById('select-sound-type').value);
+            }
+            
+            setTimeout(() => { 
+                toastElement.classList.remove('active'); 
+                hologram.classList.remove('alarm-active');
+            }, 8000);
+        }
+
+        function playEpicAudioBeep(type) {
+            let ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if(!ctx) return;
+            let now = ctx.currentTime;
+            
+            let playNote = (frequency, startTime, duration, waveType = 'sine', volume = 0.35) => {
+                let osc = ctx.createOscillator();
+                let gainNode = ctx.createGain();
+                osc.type = waveType;
+                osc.frequency.setValueAtTime(frequency, startTime);
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+                osc.connect(gainNode); gainNode.connect(ctx.destination);
+                osc.start(startTime); osc.stop(startTime + duration);
+            };
+
+            if(type === 'success') {
+                playNote(261.63, now, 0.4, 'triangle', 0.4);
+                playNote(329.63, now + 0.08, 0.4, 'sine', 0.35);
+                playNote(392.00, now + 0.16, 0.4, 'sine', 0.35);
+                playNote(493.88, now + 0.24, 0.5, 'sine', 0.4);
+                playNote(523.25, now + 0.32, 0.8, 'sine', 0.45);
+            } else if(type === 'focus') {
+                playNote(220.00, now, 1.4, 'sine', 0.5);
+                playNote(440.00, now + 0.02, 1.4, 'sine', 0.35);
+                playNote(659.25, now + 0.06, 1.2, 'sine', 0.3);
+            } else {
+                playNote(587.33, now, 0.15, 'square', 0.25);
+                playNote(587.33, now + 0.12, 0.15, 'square', 0.25);
+                playNote(880.00, now + 0.22, 0.5, 'sine', 0.45);
+                playNote(1174.66, now + 0.28, 0.6, 'sine', 0.35);
+            }
+        }
+
+        function formatDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    </script>
+</body>
+</html>
